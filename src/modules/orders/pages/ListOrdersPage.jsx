@@ -1,23 +1,23 @@
-import { useEffect, useState } from 'react';
-import Button from '../../shared/components/Button';
-import Card from '../../shared/components/Card';
-import { getOrders } from '../services/listServices';
+import { useEffect, useState } from "react";
+import Button from "../../shared/components/Button";
+import Card from "../../shared/components/Card";
+import { getOrders } from "../services/listServices";
 
 const orderStatus = {
-  ALL: 'all',
-  PENDING: 0,      // OrderStatus.Pending
-  PROCESSING: 1,   // OrderStatus.Processing
-  SHIPPED: 2,      // OrderStatus.Shipped
-  DELIVERED: 3,    // OrderStatus.Delivered
-  CANCELLED: 4,    // OrderStatus.Cancelled
+  ALL: "all",
+  PENDING: 0, // OrderStatus.Pending
+  PROCESSING: 1, // OrderStatus.Processing
+  SHIPPED: 2, // OrderStatus.Shipped
+  DELIVERED: 3, // OrderStatus.Delivered
+  CANCELLED: 4, // OrderStatus.Cancelled
 };
 
 const orderStatusLabels = {
-  0: 'Pendiente',
-  1: 'Procesando',
-  2: 'Enviado',
-  3: 'Entregado',
-  4: 'Cancelado',
+  0: "Pendiente",
+  1: "Procesando",
+  2: "Enviado",
+  3: "Entregado",
+  4: "Cancelado",
 };
 
 function ListOrdersPage() {
@@ -56,37 +56,41 @@ function ListOrdersPage() {
   }, [status, pageSize, pageNumber]);
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString('es-AR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleString("es-AR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: "ARS",
     }).format(amount);
   };
 
   return (
     <div>
       <Card>
-        <div className='flex justify-between items-center mb-3'>
-          <h1 className='text-3xl'>Órdenes</h1>
+        <div className="flex justify-between items-center mb-3">
+          <h1 className="text-3xl">Órdenes</h1>
         </div>
 
-        <div className='flex flex-col sm:flex-row gap-4'>
-          <select 
-            value={status} 
-            onChange={evt => {
-              setStatus(Number(evt.target.value));
+        <div className="flex flex-col sm:flex-row gap-4">
+          <select
+            value={status}
+            onChange={(evt) => {
+              const value = evt.target.value;
+              // Si es 'all', lo dejamos como string, si es número, lo convertimos
+              setStatus(
+                value === orderStatus.ALL ? orderStatus.ALL : Number(value)
+              );
               setPageNumber(1);
-            }} 
-            className='text-[1.3rem]'
+            }}
+            className="text-[1.3rem]"
           >
             <option value={orderStatus.ALL}>Todas</option>
             <option value={orderStatus.PENDING}>Pendientes</option>
@@ -98,65 +102,79 @@ function ListOrdersPage() {
         </div>
       </Card>
 
-      <div className='mt-4 flex flex-col gap-4'>
+      <div className="mt-4 flex flex-col gap-4">
         {loading ? (
           <span>Buscando datos...</span>
         ) : orders.length === 0 ? (
           <Card>
-            <p className='text-center text-gray-500'>No se encontraron órdenes</p>
+            <p className="text-center text-gray-500">
+              No se encontraron órdenes
+            </p>
           </Card>
         ) : (
-          orders.map(order => (
+          orders.map((order) => (
             <Card key={order.orderId}>
-              <div className='flex justify-between items-start mb-2'>
+              <div className="flex justify-between items-start mb-2">
                 <div>
-                  <h1 className='text-xl font-semibold'>Orden #{order.orderId.substring(0, 8)}</h1>
-                  <p className='text-sm text-gray-600'>
+                  <h1 className="text-xl font-semibold">
+                    Orden #{order.orderId.substring(0, 8)}
+                  </h1>
+                  <p className="text-sm text-gray-600">
                     Nombre Cliente: {order.Name}
                   </p>
                 </div>
-                <span 
+                <span
                   className={`
                     px-3 py-1 rounded-full text-sm font-medium
-                    ${order.status === 0 ? 'bg-yellow-100 text-yellow-800' : ''}
-                    ${order.status === 1 ? 'bg-blue-100 text-blue-800' : ''}
-                    ${order.status === 2 ? 'bg-purple-100 text-purple-800' : ''}
-                    ${order.status === 3 ? 'bg-green-100 text-green-800' : ''}
-                    ${order.status === 4 ? 'bg-red-100 text-red-800' : ''}
+                    ${order.status === 0 ? "bg-yellow-100 text-yellow-800" : ""}
+                    ${order.status === 1 ? "bg-blue-100 text-blue-800" : ""}
+                    ${order.status === 2 ? "bg-purple-100 text-purple-800" : ""}
+                    ${order.status === 3 ? "bg-green-100 text-green-800" : ""}
+                    ${order.status === 4 ? "bg-red-100 text-red-800" : ""}
                   `}
                 >
                   {orderStatusLabels[order.status]}
                 </span>
               </div>
-              
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-2 text-base mb-3'>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-base mb-3">
                 <div>
-                  <p className='text-gray-600'>Fecha:</p>
-                  <p className='font-medium'>{formatDate(order.date)}</p>
+                  <p className="text-gray-600">Fecha:</p>
+                  <p className="font-medium">{formatDate(order.date)}</p>
                 </div>
                 <div>
-                  <p className='text-gray-600'>Total:</p>
-                  <p className='font-bold text-lg text-green-600'>
+                  <p className="text-gray-600">Total:</p>
+                  <p className="font-bold text-lg text-green-600">
                     {formatCurrency(order.totalAmount)}
                   </p>
                 </div>
               </div>
 
-              <div className='text-sm text-gray-600'>
-                <p><strong>Dirección de Envío:</strong> {order.shippingAddress}</p>
-                <p><strong>Dirección de Facturación:</strong> {order.billingAddres}</p>
+              <div className="text-sm text-gray-600">
+                <p>
+                  <strong>Dirección de Envío:</strong> {order.shippingAddress}
+                </p>
+                <p>
+                  <strong>Dirección de Facturación:</strong>{" "}
+                  {order.billingAddres}
+                </p>
               </div>
 
-              <details className='mt-3'>
-                <summary className='cursor-pointer text-sm text-purple-600 hover:text-purple-800'>
+              <details className="mt-3">
+                <summary className="cursor-pointer text-sm text-purple-600 hover:text-purple-800">
                   Ver items ({order.items.length})
                 </summary>
-                <div className='mt-2 pl-4 border-l-2 border-gray-200'>
+                <div className="mt-2 pl-4 border-l-2 border-gray-200">
                   {order.items.map((item, index) => (
-                    <div key={index} className='py-2 border-b border-gray-100 last:border-0'>
-                      <p className='font-medium'>{item.name}</p>
-                      <p className='text-sm text-gray-600'>
-                        Cantidad: {item.quantity} × {formatCurrency(item.unitPrice)} = {formatCurrency(item.subTotal)}
+                    <div
+                      key={index}
+                      className="py-2 border-b border-gray-100 last:border-0"
+                    >
+                      <p className="font-medium">{item.name}</p>
+                      <p className="text-sm text-gray-600">
+                        Cantidad: {item.quantity} ×{" "}
+                        {formatCurrency(item.unitPrice)} ={" "}
+                        {formatCurrency(item.subTotal)}
                       </p>
                     </div>
                   ))}
@@ -167,30 +185,30 @@ function ListOrdersPage() {
         )}
       </div>
 
-      <div className='flex justify-center items-center mt-3 gap-2'>
+      <div className="flex justify-center items-center mt-3 gap-2">
         <button
           disabled={pageNumber === 1}
           onClick={() => setPageNumber(pageNumber - 1)}
-          className='bg-gray-200 disabled:bg-gray-100 disabled:cursor-not-allowed'
+          className="bg-gray-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
         >
           Atrás
         </button>
-        <span className='px-4'>Página {pageNumber}</span>
+        <span className="px-4">Página {pageNumber}</span>
         <button
           disabled={orders.length < pageSize}
           onClick={() => setPageNumber(pageNumber + 1)}
-          className='bg-gray-200 disabled:bg-gray-100 disabled:cursor-not-allowed'
+          className="bg-gray-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
         >
           Siguiente
         </button>
 
         <select
           value={pageSize}
-          onChange={evt => {
+          onChange={(evt) => {
             setPageNumber(1);
             setPageSize(Number(evt.target.value));
           }}
-          className='ml-3'
+          className="ml-3"
         >
           <option value="5">5</option>
           <option value="10">10</option>
