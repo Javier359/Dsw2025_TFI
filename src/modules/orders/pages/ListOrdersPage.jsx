@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Button from "../../shared/components/Button";
 import Card from "../../shared/components/Card";
 import { getOrders } from "../services/listServices";
+import OrderStatusUpdater from "../components/BoxStatus"; // Ajusta la ruta según donde lo guardes
 
 const orderStatus = {
   ALL: "all",
@@ -159,7 +160,12 @@ function ListOrdersPage() {
                   {order.billingAddres}
                 </p>
               </div>
-
+              {/* --- AQUI AGREGAMOS EL COMPONENTE NUEVO --- */}
+              <OrderStatusUpdater
+                orderId={order.orderId}
+                currentStatus={order.status}
+                onStatusUpdated={fetchOrders}
+              />
               <details className="mt-3">
                 <summary className="cursor-pointer text-sm text-purple-600 hover:text-purple-800">
                   Ver items ({order.items.length})
