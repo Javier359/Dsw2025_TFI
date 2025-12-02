@@ -18,25 +18,28 @@ function LoginForm() {
 
   const { singin } = useAuth();
 
-  const onValid = async (formData) => {
-    try {
-      const { error } = await singin(formData.username, formData.password);
+ const onValid = async (formData) => {
+  try {
+    const { data, error } = await singin(formData.username, formData.password);
 
-      if (error) {
-        setErrorMessage(error.frontendErrorMessage);
-
-        return;
-      }
-
-      navigate('/admin/home');
-    } catch (error) {
-      if (error?.response?.data?.code) {
-        setErrorMessage(frontendErrorMessage[error?.response?.data?.code]);
-      } else {
-        setErrorMessage('Llame a soporte');
-      }
+    if (error) {
+      // error.message puede ser string o un objeto
+      setErrorMessage(
+        typeof error.message === 'string'
+          ? error.message
+          : 'Usuario y/o contraseña incorrectos'
+      );
+      return;
     }
-  };
+
+    navigate('/admin/home');
+
+  } catch (error) {
+    console.log("ERROR EN COMPONENTE:", error);
+
+    setErrorMessage('Llame a soporte');
+  }
+};
 
   return (
     <form className='
