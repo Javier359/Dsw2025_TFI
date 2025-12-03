@@ -16,7 +16,7 @@ function LoginForm() {
 
   const navigate = useNavigate();
 
-  const { singin } = useAuth();
+  const { singin } = useAuth(); //contecto de autenticacion del back
 
  const onValid = async (formData) => {
   try {
@@ -29,6 +29,7 @@ function LoginForm() {
           : 'Usuario y/o contraseña incorrectos'
       );
       return;
+
     }
 
     navigate('/admin/home');
@@ -71,7 +72,8 @@ function LoginForm() {
       />
 
       <Button type='submit'>Iniciar Sesión</Button>
-      <Button type="button" variant='secondary' onClick={() => alert('Debe impletar navegacion y pagina de registro')}>Registrar Usuario</Button>
+
+      <Button type="button" variant='secondary' onClick={() => navigate('/register')}>Registrar Usuario</Button>
       {errorMessage && <p className='text-red-500'>{errorMessage}</p>}
     </form>
   );
