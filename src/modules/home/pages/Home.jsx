@@ -1,20 +1,28 @@
-import Card from '../../shared/components/Card';
+import StatCard from '../shared/StatCard';
+import { useDashboardStats } from '../hook/useDashboardStats';
 
 function Home() {
+  // 1. Llamas a tu lógica en una sola línea
+  const { stats, loading } = useDashboardStats();
 
   return (
-    <div
-      className='flex flex-col gap-3 sm:grid sm:grid-cols-2'
-    >
-      <Card>
-        <h3>Productos</h3>
-        <p>Cantidad: #</p>
-      </Card>
+    <div className='flex flex-col gap-3 sm:grid sm:grid-cols-2'>
+      
+      {/* 2. Reutilizas el componente visual */}
+      <StatCard 
+        title="Productos" 
+        count={stats.products} 
+        isLoading={loading}
+        colorClass="text-purple-600"
+      />
 
-      <Card>
-        <h3>Ordenes</h3>
-        <p>Cantidad: #</p>
-      </Card>
+      <StatCard 
+        title="Órdenes" 
+        count={stats.orders} 
+        isLoading={loading}
+        colorClass="text-blue-600"
+      />
+
     </div>
   );
 };

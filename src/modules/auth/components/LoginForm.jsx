@@ -23,7 +23,6 @@ function LoginForm() {
     const { data, error } = await singin(formData.username, formData.password);
 
     if (error) {
-      // error.message puede ser string o un objeto
       setErrorMessage(
         typeof error.message === 'string'
           ? error.message
@@ -72,7 +71,7 @@ function LoginForm() {
       />
 
       <Button type='submit'>Iniciar Sesión</Button>
-      <Button variant='secondary' onClick={() => alert('Debe impletar navegacion y pagina de registro')}>Registrar Usuario</Button>
+      <Button type="button" variant='secondary' onClick={() => alert('Debe impletar navegacion y pagina de registro')}>Registrar Usuario</Button>
       {errorMessage && <p className='text-red-500'>{errorMessage}</p>}
     </form>
   );
