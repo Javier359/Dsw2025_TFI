@@ -1,3 +1,4 @@
+import ShopPage from './modules/shop/page/ShopPage';
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './modules/auth/context/AuthProvider';
 import LoginPage from './modules/auth/pages/LoginPage';
@@ -11,6 +12,7 @@ import CreateProductPage from './modules/products/pages/CreateProductPage';
 import EditProductPage from './modules/products/pages/EditProductPage';
 
 
+
 function App() {
   const router = createBrowserRouter([
     {
@@ -19,7 +21,7 @@ function App() {
       children: [
         {
           path: '/',
-          element: <>Listado de productos</>,
+          element: <ShopPage/>,
         },
         {
           path: '/cart',
