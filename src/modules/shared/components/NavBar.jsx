@@ -79,7 +79,7 @@ function Navbar() {
                 </button>
                 
                 <button 
-                    onClick={() => alert("Ir a registro...")}
+                    onClick={() => navigate('/register')}
                     className="bg-gray-200 text-gray-700 px-5 py-2 rounded-md text-sm font-semibold hover:bg-gray-300 transition-colors"
                 >
                     Registrarse

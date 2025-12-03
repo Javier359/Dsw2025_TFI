@@ -25,7 +25,7 @@ function RegisterForm() {
 
   const navigate = useNavigate();
 
-  const onValid = async (formData) => {
+const onValid = async (formData) => {
     try {
       setErrorMessage('');
       setSuccessMessage('');
@@ -37,29 +37,20 @@ function RegisterForm() {
       );
 
       if (error) {
-        setErrorMessage(
-          typeof error.message === 'string'
-            ? error.message
-            : 'No se pudo registrar el usuario'
-        );
+        // AHORA EL MENSAJE YA VIENE LIMPIO DEL SERVICIO
+        setErrorMessage(error.message); 
         return;
       }
 
-      // Si el back devolvió un mensaje (string), podemos mostrarlo
-      if (typeof data === 'string') {
-        setSuccessMessage(data);
-      } else {
-        setSuccessMessage('Usuario registrado correctamente.');
-      }
+      setSuccessMessage('Usuario registrado correctamente.');
 
-      // Pequeño delay opcional y redirigimos al login
       setTimeout(() => {
         navigate('/login'); 
       }, 1000);
 
     } catch (error) {
-      console.log("ERROR EN COMPONENTE REGISTER:", error);
-      setErrorMessage('Llame a soporte');
+      console.log("ERROR CRÍTICO:", error);
+      setErrorMessage('Ocurrió un error inesperado.');
     }
   };
 

@@ -11,6 +11,7 @@ import ListProductsPage from './modules/products/pages/ListProductsPage';
 import CreateProductPage from './modules/products/pages/CreateProductPage';
 import EditProductPage from './modules/products/pages/EditProductPage';
 import Navbar from './modules/shared/components/NavBar';
+import CartPage from './modules/shop/page/CartPage';
 
 function App() {
   const router = createBrowserRouter([
@@ -18,15 +19,10 @@ function App() {
       path: '/',
       element: (
         <div className="min-h-screen bg-gray-50 flex flex-col">
-           {/* AQUÍ USAMOS EL NAVBAR COMPARTIDO */}
            <Navbar/> 
-           
-           {/* Contenido principal */}
            <main className="flex-1">
              <Outlet /> 
            </main>
-           
-           {/* Aquí podrías agregar un <Footer /> en el futuro */}
         </div>
         ),
       children: [
@@ -36,7 +32,7 @@ function App() {
         },
         {
           path: '/cart',
-          element: <>Carrito de compras</>,
+          element: <CartPage/>,
         },
       ],
     },
