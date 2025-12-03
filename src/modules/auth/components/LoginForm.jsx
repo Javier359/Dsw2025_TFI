@@ -16,25 +16,28 @@ function LoginForm() {
 
   const navigate = useNavigate();
 
-  const { singin } = useAuth();
+  const { singin } = useAuth(); //contecto de autenticacion del back
 
   const onValid = async (formData) => {
     try {
-      const { error } = await singin(formData.username, formData.password);
+      const { data, error } = await singin(formData.username, formData.password);
 
       if (error) {
-        setErrorMessage(error.frontendErrorMessage);
-
+        // error.message puede ser string o un objeto
+        setErrorMessage(
+          typeof error.message === 'string'
+            ? error.message
+            : 'Usuario y/o contraseña incorrectos'
+        );
         return;
       }
 
       navigate('/admin/home');
+
     } catch (error) {
-      if (error?.response?.data?.code) {
-        setErrorMessage(frontendErrorMessage[error?.response?.data?.code]);
-      } else {
-        setErrorMessage('Llame a soporte');
-      }
+      console.log("ERROR EN COMPONENTE:", error);
+
+      setErrorMessage('Llame a soporte');
     }
   };
 
@@ -69,7 +72,7 @@ function LoginForm() {
       />
 
       <Button type='submit'>Iniciar Sesión</Button>
-      <Button variant='secondary' onClick={() => alert('Debe impletar navegacion y pagina de registro')}>Registrar Usuario</Button>
+      <Button variant='secondary' onClick={() => navigate('/register')}>Registrar Usuario</Button>
       {errorMessage && <p className='text-red-500'>{errorMessage}</p>}
     </form>
   );

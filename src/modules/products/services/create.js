@@ -1,7 +1,7 @@
 import { instance } from '../../shared/api/axiosInstance';
 
 export const createProduct = async (formData) => {
-  await instance.post('/api/products', {
+  await instance.post('/api/products/create', {
     sku: formData.sku,
     internalCode: formData.cui,
     name: formData.name,

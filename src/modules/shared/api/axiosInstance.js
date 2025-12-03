@@ -2,36 +2,31 @@ import axios from 'axios';
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
-  withCredentials: true,
+  withCredentials: false,
 });
 
 instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
+    if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => Promise.reject(error)
 );
 
+// RESPONSE interceptor
 instance.interceptors.response.use(
-  (config) => { return config; },
+  (response) => response,
   (error) => {
-    if (error.status === 401) {
-      if (window.location.pathname.includes('/admin/')) {
-        localStorage.clear();
-        window.location.href = '/login';
-      } else {
-        localStorage.removeItem('token');
-      }
+    // OJO: era error.status, pero axios usa error.response.status
+    const status = error.response?.status;
+
+    if (status === 401) {
+      localStorage.removeItem('token');
     }
 
-    return Promise.reject(error);
-  },
+    return Promise.reject(error); // deja que el componente lo maneje
+  }
 );
 
 export { instance };
