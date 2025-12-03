@@ -4,31 +4,40 @@ import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
 import Input from '../../shared/components/Input';
 import { createProduct } from '../services/create';
+import { updateProduct } from '../services/update';
 import { useState } from 'react';
 import { frontendErrorMessage } from '../helpers/backendError';
 
-function CreateProductForm() {
+function ProductForm({ product = null, isEdit = false }) {
   const {
     register,
     formState: { errors },
     handleSubmit,
   } = useForm({
     defaultValues: {
-      sku: '',
-      cui: '',
-      name: '',
-      description: '',
-      price: 0,
-      stock: 0,
+      sku: product?.sku || '',
+      cui: product?.internalCode || '',
+      name: product?.name || '',
+      description: product?.description || '',
+      price: product?.currentUnitPrice || 0,
+      stock: product?.stockQuantity || 0,
     },
   });
 
   const [errorBackendMessage, setErrorBackendMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const onValid = async (formData) => {
     try {
-      await createProduct(formData);
+      setIsSubmitting(true);
+      setErrorBackendMessage('');
+
+      if (isEdit) {
+        await updateProduct(product.id, formData);
+      } else {
+        await createProduct(formData);
+      }
 
       navigate('/admin/products');
     } catch (error) {
@@ -37,13 +46,18 @@ function CreateProductForm() {
 
         setErrorBackendMessage(errorMessage);
       } else {
-        setErrorBackendMessage('Contactar a Soporte');
+        setErrorBackendMessage(error.response?.data?.Error || 'Contactar a Soporte');
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <Card>
+      <h2 className='text-2xl mb-4 font-semibold'>
+        {isEdit ? 'Editar Producto' : 'Crear Producto'}
+      </h2>
       <form
         className='
           flex
@@ -58,6 +72,7 @@ function CreateProductForm() {
         <Input
           label='SKU'
           error={errors.sku?.message}
+          disabled={isEdit}
           {...register('sku', {
             required: 'SKU es requerido',
           })}
@@ -65,6 +80,7 @@ function CreateProductForm() {
         <Input
           label='Código Único'
           error={errors.cui?.message}
+          disabled={isEdit}
           {...register('cui', {
             required: 'Código Único es requerido',
           })}
@@ -84,30 +100,52 @@ function CreateProductForm() {
           label='Precio'
           error={errors.price?.message}
           type='number'
+          step='0.01'
           {...register('price', {
             min: {
               value: 0,
               message: 'No puede tener un precio negativo',
             },
+            valueAsNumber: true,
           })}
         />
         <Input
           label='Stock'
           error={errors.stock?.message}
+          type='number'
           {...register('stock', {
             min: {
               value: 0,
               message: 'No puede tener un stock negativo',
             },
+            valueAsNumber: true,
           })}
         />
-        <div className='sm:text-end'>
-          <Button type='submit' className='w-full sm:w-fit'>Crear Producto</Button>
+        <div className='flex gap-2 sm:justify-end'>
+          <Button
+            type='button'
+            variant='secondary'
+            className='w-full sm:w-fit'
+            onClick={() => navigate('/admin/products')}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type='submit'
+            className='w-full sm:w-fit'
+            disabled={isSubmitting}
+          >
+            {isSubmitting
+              ? 'Guardando...'
+              : isEdit
+                ? 'Actualizar Producto'
+                : 'Crear Producto'}
+          </Button>
         </div>
         {errorBackendMessage && <span className='text-red-500'>{errorBackendMessage}</span>}
       </form>
     </Card>
   );
-};
+}
 
-export default CreateProductForm;
+export default ProductForm;
