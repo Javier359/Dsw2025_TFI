@@ -1,9 +1,7 @@
 import { instance } from '../../shared/api/axiosInstance';
 
-export const createProduct = async (formData) => {
-  await instance.post('/api/products/create', {
-    sku: formData.sku,
-    internalCode: formData.cui,
+export const updateProduct = async (id, formData) => {
+  await instance.put(`/api/products/${id}/update`, {
     name: formData.name,
     description: formData.description,
     currentUnitPrice: formData.price,

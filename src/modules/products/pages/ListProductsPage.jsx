@@ -1,65 +1,41 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
-import { getProducts } from '../services/list';
+import ProductActiveToggle from '../components/ProductActiveToggle';
+import { useProducts } from '../hooks/useProducts'; 
 
 const productStatus = {
   ALL: 'all',
-  ENABLED: 'enabled',
-  DISABLED: 'disabled',
+  ENABLED: 'enable',
+  DISABLED: 'disable',
 };
 
 function ListProductsPage() {
   const navigate = useNavigate();
+  
+  const { products, total, loading, filters, actions } = useProducts();
 
-  const [ searchTerm, setSearchTerm ] = useState('');
-  const [ status, setStatus ] = useState(productStatus.ALL);
-  const [ pageNumber, setPageNumber ] = useState(1);
-  const [ pageSize, setPageSize ] = useState(10);
+  const totalPages = Math.ceil(total / (filters.pageSize || 1));
 
-  const [ total, setTotal ] = useState(0);
-  const [ products, setProducts ] = useState([]);
-
-  const [loading, setLoading] = useState(false);
-
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await getProducts(searchTerm, status, pageNumber, pageSize);
-
-      if (error) throw error;
-
-      setTotal(data.total);
-      setProducts(data.productItems);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProducts();
-  }, [status, pageSize, pageNumber]);
-
-  const totalPages = Math.ceil(total / pageSize);
-
-  const handleSearch = async () => {
-    await fetchProducts();
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+    }).format(amount);
   };
 
   return (
     <div>
       <Card>
-        <div
-          className='flex justify-between items-center mb-3'
-        >
+        <div className='flex justify-between items-center mb-3'>
           <h1 className='text-3xl'>Productos</h1>
+          
+          {/* Botón Móvil */}
           <Button
             className='h-11 w-11 rounded-2xl sm:hidden'
+            onClick={() => navigate('/admin/products/create')}
           >
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5 11C4.44772 11 4 10.5523 4 10C4 9.44772 4.44772 9 5 9H15C15.5523 9 16 9.44772 16 10C16 10.5523 15.5523 11 15 11H5Z" fill="#000000"></path> <path d="M9 5C9 4.44772 9.44772 4 10 4C10.5523 4 11 4.44772 11 5V15C11 15.5523 10.5523 16 10 16C9.44772 16 9 15.5523 9 15V5Z" fill="#000000"></path> </g></svg>
+             <span className="text-xl">+</span>
           </Button>
 
           <Button
@@ -71,69 +47,116 @@ function ListProductsPage() {
         </div>
 
         <div className='flex flex-col sm:flex-row gap-4'>
-          <div
-            className='flex items-center gap-3'
-          >
-            <input value={searchTerm} onChange={(evt) => setSearchTerm(evt.target.value)} type="text" placeholder='Buscar' className='text-[1.3rem] w-full' />
-            <Button className='h-11 w-11' onClick={handleSearch}>
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
+          <div className='flex items-center gap-3 w-full sm:w-auto flex-1'>
+            <input
+              value={filters.search}
+              onChange={(evt) => actions.changeSearchTerm(evt.target.value)}
+              type="text"
+              placeholder='Buscar por nombre...'
+              className='text-[1.3rem] w-full border border-gray-300 rounded px-2 py-1'
+            />
+            <Button className='h-11 w-11 flex items-center justify-center' onClick={actions.handleSearch}>
+              🔍
             </Button>
           </div>
-          <select onChange={evt => setStatus(evt.target.value)} className='text-[1.3rem]'>
+          
+          <select 
+            value={filters.status} 
+            onChange={evt => actions.changeStatus(evt.target.value)} 
+            className='text-[1.3rem] border border-gray-300 rounded px-2 py-1'
+          >
             <option value={productStatus.ALL}>Todos</option>
             <option value={productStatus.ENABLED}>Habilitados</option>
             <option value={productStatus.DISABLED}>Inhabilitados</option>
           </select>
         </div>
       </Card>
-
       <div className='mt-4 flex flex-col gap-4'>
-        {
-          loading
-            ? <span>Buscando datos...</span>
-            : products.map(product => (
+        {loading ? (
+          <Card>
+            <p className="text-center text-gray-500 py-4">Cargando productos...</p>
+          </Card>
+        ) : (
+          Array.isArray(products) && products.length > 0 ? (
+            products.map(product => (
               <Card key={product.sku}>
-                <h1>{product.sku} - {product.name}</h1>
-                <p className='text-base'>Stock: {product.stockQuantity} - ${product.currentUnitPrice} - {product.isActive ? 'Activado' : 'Desactivado'}</p>
+                <div className='flex justify-between items-start mb-3'>
+                  <div>
+                    <h1 className='text-xl font-semibold'>
+                      {product.sku} - {product.name}
+                    </h1>
+                    <p className='text-sm text-gray-600'>{product.description}</p>
+                    <p className='text-base mt-2 font-medium'>
+                      Stock: {product.stockQuantity} | Precio: {formatCurrency(product.currentUnitPrice)}
+                    </p>
+                  </div>
+                  
+                  <span className={`
+                    px-3 py-1 rounded-full text-sm font-medium
+                    ${product.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
+                  `}>
+                    {product.isActive ? 'Activo' : 'Inactivo'}
+                  </span>
+                </div>
+
+                <div className='flex flex-col sm:flex-row gap-2 mt-3'>
+                  <Button
+                    className='flex-1'
+                    onClick={() => navigate(`/admin/products/${product.id}/edit`)}
+                  >
+                    ✏️ Editar
+                  </Button>
+                
+                  <ProductActiveToggle
+                    productId={product.id}
+                    isActive={product.isActive}
+                    onToggle={actions.refresh} 
+                  />
+                </div>
               </Card>
             ))
-        }
+          ) : (
+            <Card>
+              <p className='text-center text-gray-500 py-4'>No hay productos para mostrar.</p>
+            </Card>
+          )
+        )}
       </div>
 
-      <div className='flex justify-center items-center mt-3'>
+      <div className='flex justify-center items-center mt-3 gap-2 pb-4'>
         <button
-          disabled={pageNumber === 1}
-          onClick={() => setPageNumber(pageNumber - 1)}
-          className='bg-gray-200 disabled:bg-gray-100'
+          disabled={filters.page === 1}
+          onClick={() => actions.changePage(filters.page - 1)}
+          className='bg-gray-200 px-4 py-2 rounded disabled:bg-gray-100 disabled:text-gray-400'
         >
-          Atras
+          Atrás
         </button>
-        <span>{pageNumber} / {totalPages}</span>
+        
+        <span className="font-medium">
+          {filters.page} / {totalPages || 1}
+        </span>
+        
         <button
-          disabled={ pageNumber === totalPages }
-          onClick={() => setPageNumber(pageNumber + 1)}
-          className='bg-gray-200 disabled:bg-gray-100'
+          disabled={filters.page >= totalPages}
+          onClick={() => actions.changePage(filters.page + 1)}
+          className='bg-gray-200 px-4 py-2 rounded disabled:bg-gray-100 disabled:text-gray-400'
         >
           Siguiente
         </button>
 
         <select
-          value={pageSize}
-          onChange={evt => {
-            setPageNumber(1);
-            setPageSize(Number(evt.target.value));
-          }}
-          className='ml-3'
+          value={filters.pageSize}
+          onChange={evt => actions.changePageSize(Number(evt.target.value))}
+          className='ml-3 border border-gray-300 rounded p-2'
         >
-          <option value="2">2</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
+          <option value="2">2 por pág</option>
+          <option value="10">10 por pág</option>
+          <option value="15">15 por pág</option>
+          <option value="20">20 por pág</option>
         </select>
       </div>
     </div>
-
   );
-};
+}
 
 export default ListProductsPage;

@@ -1,9 +1,7 @@
-import CreateProductForm from '../components/CreateProductForm';
+import ProductForm from '../components/ProductForm';
 
 function CreateProductPage() {
-  return (
-    <CreateProductForm />
-  );
+  return <ProductForm />;
 }
 
 export default CreateProductPage;
