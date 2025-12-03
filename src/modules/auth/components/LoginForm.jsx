@@ -19,27 +19,34 @@ function LoginForm() {
   const { singin } = useAuth(); //contecto de autenticacion del back
 
  const onValid = async (formData) => {
-  try {
-    const { data, error } = await singin(formData.username, formData.password);
+    try {
+      // Ahora data trae { token, roles }
+      const { data, error } = await singin(formData.username, formData.password);
 
-    if (error) {
-      setErrorMessage(
-        typeof error.message === 'string'
-          ? error.message
-          : 'Usuario y/o contraseña incorrectos'
-      );
-      return;
+      if (error) {
+        setErrorMessage(
+          typeof error.message === 'string'
+            ? error.message
+            : 'Usuario y/o contraseña incorrectos'
+        );
+        return;
+      }
 
+      // --- LÓGICA DE REDIRECCIÓN ---
+      // Verificamos si el array de roles incluye "ADMIN"
+      if (data.roles && data.roles.includes("ADMIN")) {
+        console.log("Es Admin, yendo al dashboard...");
+        navigate('/admin/home');
+      } else {
+        console.log("Es Usuario normal, yendo a la tienda...");
+        navigate('/'); // Redirige al Home/Shop público
+      }
+
+    } catch (error) {
+      console.log("ERROR EN COMPONENTE:", error);
+      setErrorMessage('Llame a soporte');
     }
-
-    navigate('/admin/home');
-
-  } catch (error) {
-    console.log("ERROR EN COMPONENTE:", error);
-
-    setErrorMessage('Llame a soporte');
-  }
-};
+  };
 
   return (
     <form className='

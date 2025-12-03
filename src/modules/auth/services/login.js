@@ -6,22 +6,20 @@ export const login = async (username, password) => {
       'api/auth/login',
       { username, password }
     );
-
     return {
-      data: response.data.token,
+      data: {
+        token: response.data.token,
+        roles: response.data.user.roles  
+      },
       error: null
     };
 
   } catch (error) {
-
     return {
       data: null,
       error: {
-        message:
-          error.response?.data ||
-          "Usuario y/o contraseña incorrectos"
+        message: error.response?.data?.message || "Usuario y/o contraseña incorrectos"
       }
     };
   }
 };
-
